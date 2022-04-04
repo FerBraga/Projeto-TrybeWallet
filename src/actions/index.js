@@ -16,8 +16,7 @@ export function fetchCurrency() {
     const response = await fetch('https://economia.awesomeapi.com.br/json/all');
     const resultado = await response.json();
     const novo = Object.keys(resultado);
-    const final = novo.splice(1, 1);
-    console.log(final);
+    novo.splice(1, 1);
     dispatch(walletInfo(novo));
   };
 }
