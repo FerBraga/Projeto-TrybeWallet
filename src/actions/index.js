@@ -10,3 +10,14 @@ export const walletInfo = (payload) => ({
   type: INFO_WALLET,
   payload,
 });
+
+export function fetchCurrency() {
+  return async (dispatch) => {
+    const response = await fetch('https://economia.awesomeapi.com.br/json/all');
+    const resultado = await response.json();
+    const novo = Object.keys(resultado);
+    const final = novo.splice(1, 1);
+    console.log(final);
+    dispatch(walletInfo(novo));
+  };
+}
