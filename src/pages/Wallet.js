@@ -4,6 +4,8 @@ import PropTypes from 'prop-types';
 import Cabeçalho from '../components/Cabeçalho';
 import { fetchCurrency, despesaInfo, fetchAll } from '../actions';
 
+const alimenta = 'Alimentação';
+
 class Wallet extends React.Component {
   constructor() {
     super();
@@ -13,10 +15,9 @@ class Wallet extends React.Component {
       id: 0,
       value: 0,
       description: '',
-      currency: '',
-      method: '',
-      tag: '',
-      exchangeRates: {},
+      currency: 'USD',
+      method: 'Dinheiro',
+      tag: alimenta,
     };
   }
 
@@ -25,21 +26,52 @@ class Wallet extends React.Component {
     dispatchInfo();
   }
 
+  fetchAll= async () => {
+    const response = await fetch('https://economia.awesomeapi.com.br/json/all');
+    const resultado = await response.json();
+    return resultado;
+  };
+
   handleInput = ({ target: { name, value } }) => {
     this.setState({
       [name]: value,
     });
   }
 
+      newState = () => {
+        const { walletExpenses } = this.props;
+        const novoTotal = walletExpenses
+          .map((despesa) => Number(despesa.value)
+    * Number(despesa.exchangeRates[despesa.currency].ask))
+          .reduce((att, crr) => att + crr, 0).toFixed(2);
+        return novoTotal;
+      };
+
   handleClick = async (event) => {
-    const { dispatchDespesa, dispatchAll } = this.props;
-    const { id, exchangeRates, value, description, method, tag, currency } = this.state;
     event.preventDefault();
+    const { dispatchDespesa } = this.props;
+    const { id, value, description, method, tag, currency } = this.state;
+    const valorDoCambio = await this.fetchAll();
     this.setState((prevState) => ({
       id: prevState.id + 1,
-      // exchangeRates: fetchAll(),
     }));
-    dispatchDespesa({ id, value, description, tag, method, currency, exchangeRates });
+    dispatchDespesa({
+      id,
+      value,
+      description,
+      tag,
+      method,
+      currency,
+      exchangeRates: valorDoCambio,
+    });
+    this.setState({
+      total: this.newState(),
+      value: '',
+      description: '',
+      currency: 'USD',
+      method: 'Dinheiro',
+      tag: alimenta,
+    });
   }
 
   render() {
@@ -52,7 +84,7 @@ class Wallet extends React.Component {
           { `${walletState.email}` }
         </div>
         <div data-testid="total-field">
-          {total}
+          { total }
         </div>
         <div data-testid="header-currency-field">
           { moedaAtual }
@@ -142,6 +174,7 @@ class Wallet extends React.Component {
 const mapStateToProps = (state) => ({
   walletState: state.user,
   walletCurrencies: state.wallet.currencies,
+  walletExpenses: state.wallet.expenses,
 });
 
 const mapDispatchToProps = (dispatch) => ({
@@ -154,8 +187,8 @@ Wallet.propTypes = {
   walletState: PropTypes.func.isRequired,
   dispatchInfo: PropTypes.func.isRequired,
   dispatchDespesa: PropTypes.func.isRequired,
-  dispatchAll: PropTypes.func.isRequired,
   walletCurrencies: PropTypes.func.isRequired,
+  walletExpenses: PropTypes.func.isRequired,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Wallet);

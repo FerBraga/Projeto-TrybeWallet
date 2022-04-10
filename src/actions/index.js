@@ -32,6 +32,6 @@ export function fetchAll() {
   return async (dispatch) => {
     const response = await fetch('https://economia.awesomeapi.com.br/json/all');
     const resultado = await response.json();
-    return resultado;
+    dispatch(despesaInfo(resultado));
   };
 }
