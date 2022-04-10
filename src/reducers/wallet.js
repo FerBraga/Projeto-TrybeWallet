@@ -1,14 +1,8 @@
-import { INFO_WALLET } from '../actions/index';
+import { INFO_WALLET, INFO_DESPESA } from '../actions/index';
 
 const INITIAL_STATE = {
-
-  user: {
-    email: '',
-  },
-  wallet: {
-    currencies: [],
-    expenses: [],
-  },
+  currencies: [],
+  expenses: [],
 };
 
 const walletReducer = (state = INITIAL_STATE, action) => {
@@ -17,6 +11,11 @@ const walletReducer = (state = INITIAL_STATE, action) => {
     return {
       ...state,
       currencies: action.payload,
+    };
+  case INFO_DESPESA:
+    return {
+      ...state,
+      expenses: [...state.expenses, action.payload],
     };
   default:
     return state;
